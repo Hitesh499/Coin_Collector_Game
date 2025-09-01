@@ -15,6 +15,8 @@ def resource_path(relative_path):
 pygame.init()
 pygame.mixer.init()
 
+pygame.display.set_icon(pygame.image.load(resource_path("icon.png")))
+
 WIDTH, HEIGHT = 800, 600
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Collect the Coins!")
