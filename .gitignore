@@ -1,0 +1,21 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build and distribution folders
+build/
+dist/
+*.egg-info/
+
+# Executable files
+*.exe
+
+# PyInstaller or cx_Freeze build files
+*.spec
+
+# macOS hidden files
+.DS_Store
+
+# VSCode settings (optional)
+.vscode/

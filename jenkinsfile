@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        PYTHON_HOME = 'C:\\Users\\Hitesh Darshan\\AppData\\Local\\Programs\\Python\\Python313'
+        PATH = "${PYTHON_HOME};${PYTHON_HOME}\\Scripts;%PATH%"
+    }
+
+    stages {
+        stage('githubpull_3') {
+            steps {
+                echo "✅ Pulling code from GitHub (auto-handled by Jenkins SCM)"
+            }
+        }
+
+        stage('buildandcodereview_3') {
+            steps {
+                echo "✅ Running syntax check and code formatting..."
+                bat '''
+                python --version
+                pip install pylint black
+                pylint Coin_Collector_game.py || exit /b 0
+                black --check Coin_Collector_game.py
+                '''
+            }
+        }
+
+        stage('unittest_3') {
+            steps {
+                echo "✅ Running unit tests..."
+                bat '''
+                pip install pytest
+                pytest tests/
+                '''
+            }
+        }
+
+        stage('build_exe_3') {
+            steps {
+                echo "🛠️ Building .exe using PyInstaller with .spec file..."
+                bat '''
+                pip install pyinstaller
+                rmdir /S /Q dist
+                rmdir /S /Q build
+                pyinstaller Coin_Collector_game.spec
+                '''
+            }
+        }
+
+        stage('deploy_3') {
+            steps {
+                echo "🚀 Deploying .exe to C:\\GameTrail_Executable..."
+                bat '''
+                mkdir C:\\GameTrail_Executable 2>nul
+                copy /E /I /Y dist\\Coin_Collector_game C:\\GameTrail_Executable
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🎉 Build and deployment successful! Game is available at C:\\GameTrail_Executable"
+        }
+        failure {
+            echo "❌ Build or deployment failed. Please check logs."
+        }
+    }
+}
