@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'windows' }  // ✅ Ensure Jenkins agent runs on Windows
 
     environment {
         PYTHON_HOME = 'C:\\Users\\Hitesh Darshan\\AppData\\Local\\Programs\\Python\\Python313'
@@ -7,52 +7,43 @@ pipeline {
     }
 
     stages {
-        stage('githubpull_3') {
+        stage('Checkout') {
             steps {
-                echo "✅ Pulling code from GitHub (auto-handled by Jenkins SCM)"
+                echo "✅ Pulling code from GitHub..."
+                checkout scm
             }
         }
 
-        stage('buildandcodereview_3') {
+        stage('Lint & Test') {
             steps {
-                echo "✅ Running syntax check and code formatting..."
+                echo "🔍 Linting & Testing..."
                 bat '''
-                python --version
-                pip install pylint black
+                pip install pylint black pytest
                 pylint Coin_Collector_game.py || exit /b 0
                 black --check Coin_Collector_game.py
-                '''
-            }
-        }
-
-        stage('unittest_3') {
-            steps {
-                echo "✅ Running unit tests..."
-                bat '''
-                pip install pytest
                 pytest tests/
                 '''
             }
         }
 
-        stage('build_exe_3') {
+        stage('Build EXE') {
             steps {
-                echo "🛠️ Building .exe using PyInstaller with .spec file..."
+                echo "🛠️ Building executable..."
                 bat '''
                 pip install pyinstaller
-                rmdir /S /Q dist
-                rmdir /S /Q build
+                rmdir /S /Q dist 2>nul
+                rmdir /S /Q build 2>nul
                 pyinstaller Coin_Collector_game.spec
                 '''
             }
         }
 
-        stage('deploy_3') {
+        stage('Deploy Executable') {
             steps {
                 echo "🚀 Deploying .exe to C:\\GameTrail_Executable..."
                 bat '''
                 mkdir C:\\GameTrail_Executable 2>nul
-                copy /E /I /Y dist\\Coin_Collector_game C:\\GameTrail_Executable
+                xcopy /E /I /Y dist\\Coin_Collector_game C:\\GameTrail_Executable
                 '''
             }
         }
@@ -60,10 +51,10 @@ pipeline {
 
     post {
         success {
-            echo "🎉 Build and deployment successful! Game is available at C:\\GameTrail_Executable"
+            echo "🎉 Build successful! Game available at C:\\GameTrail_Executable"
         }
         failure {
-            echo "❌ Build or deployment failed. Please check logs."
+            echo "❌ Build failed. Check logs."
         }
     }
 }
