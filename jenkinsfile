@@ -1,9 +1,9 @@
 pipeline {
-    agent { label 'windows' }  // ✅ Ensure Jenkins agent runs on Windows
+    agent { label 'windows' }  // ✅ Ensure Jenkins runs on Windows machine
 
     environment {
         PYTHON_HOME = 'C:\\Users\\Hitesh Darshan\\AppData\\Local\\Programs\\Python\\Python313'
-        PATH = "${PYTHON_HOME};${PYTHON_HOME}\\Scripts;%PATH%"
+        PATH = "${PYTHON_HOME};${PYTHON_HOME}\\Scripts;${env.PATH}"
     }
 
     stages {
@@ -18,10 +18,11 @@ pipeline {
             steps {
                 echo "🔍 Linting & Testing..."
                 bat '''
+                pip install --upgrade pip
                 pip install pylint black pytest
                 pylint Coin_Collector_game.py || exit /b 0
                 black --check Coin_Collector_game.py
-                pytest tests/
+                pytest tests/ || exit /b 1
                 '''
             }
         }
@@ -31,9 +32,15 @@ pipeline {
                 echo "🛠️ Building executable..."
                 bat '''
                 pip install pyinstaller
-                rmdir /S /Q dist 2>nul
-                rmdir /S /Q build 2>nul
-                pyinstaller Coin_Collector_game.spec
+                if exist dist rmdir /S /Q dist
+                if exist build rmdir /S /Q build
+
+                :: If you already have a .spec file
+                if exist Coin_Collector_game.spec (
+                    pyinstaller Coin_Collector_game.spec
+                ) else (
+                    pyinstaller --onefile --windowed Coin_Collector_game.py
+                )
                 '''
             }
         }
@@ -42,7 +49,7 @@ pipeline {
             steps {
                 echo "🚀 Deploying .exe to C:\\GameTrail_Executable..."
                 bat '''
-                mkdir C:\\GameTrail_Executable 2>nul
+                if not exist C:\\GameTrail_Executable mkdir C:\\GameTrail_Executable
                 xcopy /E /I /Y dist\\Coin_Collector_game C:\\GameTrail_Executable
                 '''
             }
