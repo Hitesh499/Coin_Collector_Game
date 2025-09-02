@@ -18,6 +18,7 @@ a = Analysis(
         ('walk_left.png', '.'),
         ('walk_right.png', '.'),
         ('walk_up.png', '.'),
+        ('icon.png', '.'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -54,3 +55,4 @@ coll = COLLECT(
     upx_exclude=[],
     name='Coin_Collector_game'
 )
+
