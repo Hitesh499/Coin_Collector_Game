@@ -21,7 +21,8 @@ python Coin_Collector_game.py
 
 3. Docker Support to package game as a Docker Container
 
-docker build -t python-game .
-docker run -it python-game
+docker build -t coin-collector-game .  
+docker run -d -p 8082:80 coin-collector-game
+
 
 
